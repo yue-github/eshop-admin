@@ -40,6 +40,6 @@
     "vue-loader": "^11.1.4",
     "vue-template-compiler": "^2.1.8",
     "webpack": "^2.2.0-rc.4",
-    "webpack-dev-server": "^1.16.2"
+    "webpack-dev-server": "^3.1.11"
   }
 }
