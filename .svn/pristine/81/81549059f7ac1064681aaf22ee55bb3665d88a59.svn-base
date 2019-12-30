@@ -1,0 +1,609 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-default/index.css'
+import 'simple-line-icons/css/simple-line-icons.css'
+import App from './App.vue'
+import axios from 'axios'
+import StatBox from './StatBox.vue'
+import Panel from './Panel.vue'
+import AppLogin from './login.vue'
+import './assets/UE/ueditor.config.js'
+import './assets/UE/ueditor.all.min.js'
+import './assets/UE/lang/zh-cn/zh-cn.js'
+import './assets/UE/ueditor.parse.min.js'
+import UE from './UE.vue'
+import VueClipboard from 'vue-clipboard2'
+
+
+Vue.use(VueRouter)
+Vue.use(ElementUI)
+Vue.use(UE)
+Vue.use(VueClipboard)
+
+Vue.component(StatBox.name, StatBox)
+Vue.component(Panel.name, Panel)
+Vue.component(UE.name, UE)
+var Axios=axios;
+
+
+// Vue.prototype.baseUrl="http://192.168.1.115:8080/eshop/"
+// Vue.prototype.baseUrl="http://39.106.26.67:8080/eshop/"
+// Vue.prototype.baseUrl="http://219.137.228.253:8080/eshop/"
+// Vue.prototype.baseUrl="http://121.46.4.224:8080/eshop/"
+// Vue.prototype.baseUrl="http://120.25.237.243:8080/bay-eshop/"
+Vue.prototype.baseUrl="https://service.eebin.com/" //正式服https
+// Vue.prototype.baseUrl="http://localhost:8080/eshop/"
+// Vue.prototype.baseUrl="http://eshop.bayou-tech.cn/eshop/"
+// Vue.prototype.baseUrl="http://localhost:8080/eshop/"
+// Vue.prototype.baseUrl="http://localhost:8080/eshop/"
+// Vue.prototype.baseUrl="http://localhost:81/eshop/"
+//Vue.prototype.baseUrl="http://120.25.237.243:8080/eshop/"
+// Vue.prototype.baseUrl="http://service.eebin.com/"
+// Vue.prototype.baseUrl="http://121.46.4.224:8080/eshop/"
+//Vue.prototype.baseUrl="http://192.168.0.106:8080/eshop/"
+// Vue.prototype.baseUrl="http://192.168.1.115:8080/eshop/"
+//Vue.prototype.baseUrl="http://120.25.237.243:8080/eshop/"
+//Vue.prototype.baseUrl="http://admin.eebin.com/"
+//Vue.prototype.baseUrl="http://localhost:81/eshop/"
+//Vue.prototype.baseUrl="http://120.25.237.243:8080/eshop/"
+//Vue.prototype.baseUrl="http://admin.eebin.com/"
+Vue.prototype.pcUrl="http://eebin.cn/"
+Vue.prototype.mobileUrl="http://mobile.eebin.com/"
+
+Vue.prototype.empty = function(value) {
+  if (value === '' || value == undefined) {
+    return true;
+  } 
+  return false;
+}
+
+Vue.prototype.$getMonthFirstDay = function() {
+  var date = new Date();
+  var y = date.getFullYear();
+  var m = date.getMonth();
+  var firstDate = new Date(y, m, 1);
+  var year = firstDate.getFullYear();
+  var month = firstDate.getMonth() + 1;
+  var day = firstDate.getDate();
+  if (month < 10) {
+    month = '0' + month;
+  }
+  if (day < 10) {
+    day = '0' + day;
+  }
+  return year + '-' + month + '-' + day;
+}
+
+Vue.prototype.$getMonthLastDay = function() {
+  var date = new Date();
+  var y = date.getFullYear();
+  var m = date.getMonth();
+  var lastDate = new Date(y, m + 1, 0);
+  var year = lastDate.getFullYear();
+  var month = lastDate.getMonth() + 1;
+  var day = lastDate.getDate();
+  if (month < 10) {
+    month = '0' + month;
+  }
+  if (day < 10) {
+    day = '0' + day;
+  }
+  return year + '-' + month + '-' + day;
+}
+
+Vue.prototype.$getSupplierType = function(type) {
+  var typeMap = [
+    {type:1, name:"个人性质"},
+    {type:2, name:"公司性质"},
+  ];
+  for (var i = 0; i < typeMap.length; i++) {
+    if (typeMap[i].type == type)
+      return typeMap[i].name;
+  }
+  return "";
+}
+
+Vue.prototype.$trim = function(str){   
+str = str.replace(/^(\s|\u00A0)+/,'');   
+for(var i=str.length-1; i>=0; i--){   
+    if(/\S/.test(str.charAt(i))){   
+            str = str.substring(0, i+1);   
+            break;   
+        }   
+    }   
+    return str;   
+}  
+
+Vue.prototype.$getAbsolutePath = function(path) {
+  if (!path) {
+    return path;
+  }
+  if (path.indexOf('http://') >= 0 || path.indexOf('https://') >= 0) {
+    return path;
+  } else {
+    return Vue.prototype.baseUrl + path;
+  }
+}
+
+Vue.prototype.$sleep = function(mesc) {
+  mesc += new Date().getTime();
+  while (new Date().getTime() < mesc) {}
+}
+
+Vue.prototype.$getRecommendType = function(type) {
+  var typeMap = [
+    {type:1, name:"产品"},
+    {type:2, name:"服务"},
+    {type:3, name:"店铺"},
+    {type:4, name:"广告"},
+  ];
+  for (var i = 0; i < typeMap.length; i++) {
+    if (typeMap[i].type == type) {
+      return typeMap[i].name;
+    }
+  }
+  return "";
+}
+
+Vue.prototype.$getStatus = function(status) {
+  if (status == 1) {
+    return '已支付';
+  } else if (status == 2) {
+    return '已发货';
+  } else if (status == 3) {
+    return '已收货';
+  } else {
+    return '';
+  }
+}
+
+Vue.prototype.$getOrderStatus = function(status) {
+  var orderStatusMap = [
+    {status:1, name:"待付款"},
+    {status:2, name:"待发货"},
+    {status:3, name:"待收货"},
+    {status:4, name:"待评价"},
+    {status:5, name:"已评价"},
+    {status:6, name:"已取消"},
+    {status:7, name:"订单完成"},
+  ];
+  for (var i = 0; i < orderStatusMap.length; i++) {
+    if (orderStatusMap[i].status == status)
+      return orderStatusMap[i].name;
+  }
+  return "";
+}
+
+Vue.prototype.$getOrderSource = function(source) {
+  var orderSourceMap = [
+    {source: 1, name:"PC端"},
+    {source: 2, name:"微信端"},
+    {source: 3, name:"androidAPP"},
+    {source: 4, name:"苹果APP"},
+  ];
+  for (var i = 0; i < orderSourceMap.length; i++) {
+    if (orderSourceMap[i].source == source)
+      return orderSourceMap[i].name;
+  }
+  return "";
+}
+
+Vue.prototype.$getOrderPayType = function(payType) {
+  var orderPayTypeMap = [
+    {payType:1, name:"微信支付"},
+    {payType:2, name:"支付宝支付"},
+    {payType:3, name:"银联支付"},
+    {payType:4, name:"余额支付"},
+    {payType:5, name:"团购卡支付"},
+    {payType:6, name:"积分兑换"},
+  ];
+  for (var i = 0; i < orderPayTypeMap.length; i++) {
+    if (orderPayTypeMap[i].payType == payType)
+      return orderPayTypeMap[i].name;
+  }
+  return "";
+}
+Vue.prototype.$getOrderPayTypes = function(payTypes) {
+  var orderPayTypeMap = [
+    {payType:1, name:"微信支付"},
+    {payType:2, name:"支付宝支付"},
+    {payType:3, name:"银联支付"},
+    {payType:4, name:"余额支付"},
+    {payType:5, name:"团购卡支付"},
+    {payType:6, name:"积分兑换"},
+  ];
+  var str = "";
+  for (var i = 0; i < payTypes.length; i++) {
+    for (var j = 0; j < orderPayTypeMap.length; j++) {
+      if (orderPayTypeMap[j].payType == payTypes[i])
+        str += orderPayTypeMap[j].name + ",";
+    }
+  }
+  if (str != "") {
+    str = str.substr(0, str.length - 1);
+  }
+  return str;
+}
+Vue.prototype.$getOrderSource = function(source) {
+  if (source == 1) {
+    return 'PC端';
+  } else if (source == 2) {
+    return '微信公众号';
+  } else if (source == 3) {
+    return '安卓APP';
+  } else if (source == 4) {
+    return '苹果APP';
+  } else {
+    return '';
+  }
+}
+Vue.prototype.$productInvoiceType = function(invoiceType ) {
+  if (invoiceType == 'value_add') {
+    return '增值税专用发票';
+  } else if (invoiceType == 'general') {
+    return '增值税普通发票';
+  }
+  return "";
+}
+Vue.prototype.$getInvoiceType = function(invoiceType ) {
+  var invoiceTypeMap = [
+    {invoiceType:1, name:"普通发票"},
+    {invoiceType:2, name:"电子发票"},
+    {invoiceType:3, name:"增值税发票"}
+  ];
+  for (var i = 0; i < invoiceTypeMap.length; i++) {
+    if (invoiceTypeMap[i].invoiceType == invoiceType)
+      return invoiceTypeMap[i].name;
+  }
+  return "";
+}
+Vue.prototype.$formatDate=function(input){
+  var oDate=new Date(input);
+  var Year=oDate.getFullYear();
+  var Month=(oDate.getMonth()+1);
+  Month = (Month > 9) ? Month : (0+''+Month);
+  var Day=oDate.getDate();
+  Day = (Day > 9) ? Day : (0+''+Day);
+  return Year + '-' + Month + '-' + Day;
+};
+
+Vue.prototype.$formatDateTime=function(input){
+  var oDate=new Date(input);
+  var Year=oDate.getFullYear();
+  var Month=(oDate.getMonth()+1);
+  Month = (Month > 9) ? Month : (0+''+Month);
+  var Day=oDate.getDate();
+  Day = (Day > 9) ? Day : (0+''+Day);
+  var Hours=oDate.getHours();
+  Hours = Hours > 9 ? Hours : '0' + Hours;
+  var Minutes=oDate.getMinutes();
+  Minutes = Minutes > 9 ? Minutes : '0' + Minutes;
+  var Seconds=oDate.getSeconds();
+  Seconds = Seconds > 9 ? Seconds : '0' + Seconds;
+  var date = Year + '-' + Month + '-' + Day;
+  var time = Hours + ':' + Minutes + ':' + Seconds;
+  var arr = [date, time];
+  return arr.join(' ');
+};
+
+Vue.prototype.notifySuccess = function(message) {
+  this.$notify({
+    title: '成功',
+    message: message,
+    type: 'success'
+  });
+}
+
+Vue.prototype.notifyError = function(message) {
+  this.$notify.error({
+    title: '错误',
+    message: message
+  });
+}
+
+Vue.prototype.notifyWarning = function(message) {
+  this.$notify({
+    title: '警告',
+    message: message,
+    type: 'warning'
+  });
+}
+
+Vue.prototype.notifyInfo = function(message) {
+  this.$notify.info({
+    title: '消息',
+    message: message
+  });
+}
+
+Vue.prototype.messageSuccess = function(message) {
+  this.$message({
+    message: message,
+    type: 'success'
+  });
+}
+
+Vue.prototype.messageError = function(message) {
+  this.$message.error(message);
+}
+
+Vue.prototype.messageWarning = function(message) {
+  this.$message({
+    message: message,
+    type: 'warning'
+  });
+}
+
+Vue.prototype.message = function(message) {
+  this.$message(message);
+}
+
+Vue.prototype.$post=function(api,data){
+	var params = new URLSearchParams()
+	if (data === undefined) {
+    data = {};
+	}
+	for (var key in data) {
+		params.append(key, data[key]);
+	}
+  if(localStorage.token){
+    data.adminToken=localStorage.token;
+    params.append("adminToken",localStorage.token);
+  }else{
+	  data.adminToken="";
+	  params.append("adminToken","");
+		window.location.href="#/login";
+    location.reload();
+  }
+
+  var ox = Axios.post(this.baseUrl+api,params);
+  ox.then2 = function(success, error) {
+    return ox.then(function(response) {
+      if (response.data.error == 3) {
+        localStorage.token = "";
+        window.location.href="#/login";
+        location.reload();
+      }
+      else {
+        success(response);
+      }
+    }, error);
+  }
+
+  return ox;
+}
+Vue.prototype.$get=function(api,data){  
+  if (data === undefined) {
+    data = {};
+  }
+  if(localStorage.token){
+    data.adminToken=localStorage.token;
+  }else if(data.adminToken==""){
+    data.adminToken="";
+    window.location.href="#/login";
+    location.reload();
+  }
+
+  var ox = Axios.get(this.baseUrl+api,{params:data});
+  ox.then2 = function(success, error) {
+    return ox.then(function(response) {
+      if (response.data.error == 3) {
+        localStorage.token = "";
+        window.location.href="#/login";
+        location.reload();
+      }
+      else {
+        success(response);
+      }
+    }, error);
+  }
+
+  return ox;
+}
+Vue.prototype.$put=function(api,data){
+    if (data === undefined) {
+            data = {};
+        }
+    if(localStorage.token){
+      data.adminToken=localStorage.token;
+     }else if(data.adminToken==""){
+        data.adminToken="";
+        window.location.href="#/login";
+        location.reload();
+     }
+  
+  return Axios.put(this.baseUrl+api,data);
+}
+Vue.prototype.$delete=function(api,data){
+    if (data === undefined) {
+            data = {};
+        }
+    if(localStorage.token){
+      data.adminToken=localStorage.token;
+     }else if(data.adminToken==""){
+        data.adminToken="";
+        window.location.href="#/login";
+        location.reload();
+     }
+  
+  return Axios.delete(this.baseUrl+api,{params:data});
+}
+Vue.prototype.$filter=Vue.filter('date',function(input,e,k){
+  if(!input){
+   return "";
+  }
+  var oDate=new Date(input);
+  if(k){
+  oDate = +oDate + 1000*60*60*24*k;
+  oDate = new Date(oDate);
+  }
+
+  var Year=oDate.getFullYear();
+  var Month=(oDate.getMonth()+1);
+  var Day=oDate.getDate();
+  var Hours=oDate.getHours();
+  var Minutes=oDate.getMinutes();
+  var Seconds=oDate.getSeconds();
+  if(e=="y-m-d"){
+    return Year+'-'+Month+'-'+Day;
+  }else if(e=="y.m.d"){
+    return Year+'.'+Month+'.'+Day;
+  }else{
+     return Year+'-'+Month+'-'+Day+' '+Hours+':'+Minutes+':'+Seconds;
+  }
+ 
+});
+
+//打印功能
+Vue.prototype.bundprint=function(id){
+  //新窗口打开
+  let newWindow = window.open("_blank");
+  //获取需要生成pdf页面的div代码
+  let codestr = document.getElementById(id).innerHTML;
+  //向文档写入HTML表达式或者JavaScript代码
+  newWindow.document.write(codestr);
+    //关闭document的输出流, 显示选定的数据
+  newWindow.document.close();
+  //打印当前窗口
+  newWindow.print();
+  return true;
+}
+
+Vue.prototype.dataMap=function(obj,key){
+    console.log(obj[key]);
+}
+
+import HomeTpl from './Home.vue'
+import UsersTpl from './Users.vue'
+import RecommendPositionTpl from './RecommendPosition.vue'
+import AdvertisementTpl from './Advertisement.vue'
+import InvoiceRecordTpl from './InvoiceRecord.vue'
+import BalanceOfAccountTpl from './BalanceOfAccount.vue'
+import SummaryTpl from './Summary.vue'
+import SalesDetailTpl from './SalesDetail.vue'
+import SupplierReconciliationTpl from './SupplierReconciliation.vue'
+import SupplierDetailTpl from './SupplierDetail.vue'
+import WithdrawTpl from './Withdraw.vue'
+import RechargeTpl from './Recharge.vue'
+import TexSignsTpl from './TexSigns.vue'
+import PayRateTpl from './PayRate.vue'
+import OrdersTpl from './Orders.vue'
+import AuthorityTpl from './Authority.vue'
+import CategoryTpl from './Category.vue'
+import PropertyTpl from './Property.vue'
+import ProductTpl from './Product.vue'
+import RefundTpl from './Refund.vue'
+import GoodsReturnTpl from './GoodsReturn.vue'
+import SupplierTpl from './Supplier.vue'
+import RecommendTpl from './Recommend.vue'
+import PromotionTpl from './Promotion.vue'
+import CouponTpl from './Coupon.vue'
+import CashTpl from './Cash.vue'
+import ShopTpl from './Shop.vue'
+import CustomerCategoryTpl from './CustomerCategory.vue'
+import RoleTpl from './Role.vue'
+import MessageTpl from './Message.vue'
+import SalesRecordTpl from './SalesRecord.vue'
+import SalesRecordDetailTpl from './SalesRecordDetail.vue'
+import SetPriceTpl from './SetPrice.vue'
+import ContractManageTpl from './ContractManage.vue'
+import ShouzhiTpl from './Shouzhi.vue'
+import VisitTpl from './CustomerVisit.vue'
+import PersonalGrowthValueTpl from './PersonalGrowthValue.vue'
+import PersonalIntegralTpl from './PersonalIntegral.vue'
+import PersonalCurrencyTpl from './PersonalCurrency.vue'
+import IntegralRuleTpl from './IntegralRule.vue'
+import GradeRuleTpl from './GradeRule.vue'
+import ProductSalesVisitTpl from './ProductSalesVisit.vue'
+import CommodityCategoryVisitTpl from './CommodityCategoryVisit.vue'
+import NoticeTpl from './Notice.vue'
+import SalesSummaryTpl from './SalesSummary.vue'
+import SearchWordTpl from './SearchWord.vue'
+import SupplierBillTpl from './SupplierBill.vue'
+import HelpLinkTpl from './HelpLink.vue'
+import SupplierPeriodTpl from './SupplierPeriod.vue'
+import TripDetailTpl from './TripDetail.vue'
+import HotelDetailTpl from './HotelDetail.vue'
+import SaleCostTpl from './SaleCost.vue'
+import GroupActivityTpl from './GroupActivity.vue'
+import PointTpl from './Point.vue'
+import OperationLogTpl from './OperationLog.vue'
+import ProductBrandTpl from './ProductBrand.vue'
+import MvpAnalyze from './MvpAnalyze.vue'
+import MvpAnalyzeDetails from './MvpAnalyzeDetails.vue'
+
+const routes = [  
+  { path: '/', redirect: '/home' },
+  { path: '/home', component: HomeTpl },
+  { path: '/customer', component: UsersTpl },
+  { path: '/recommendPosition', component: RecommendPositionTpl },
+  { path: '/advertisement', component: AdvertisementTpl },
+  { path: '/invoiceRecord', component: InvoiceRecordTpl },
+  { path: '/balanceOfAccount', component: BalanceOfAccountTpl },
+  { path: '/summary', component: SummaryTpl },
+  { path: '/salesDetail', component: SalesDetailTpl },
+  { path: '/supplierReconciliation', component: SupplierReconciliationTpl },
+  { path: '/supplierDetail', component: SupplierDetailTpl },
+  { path: '/withdraw', component: WithdrawTpl },
+  { path: '/recharge', component: RechargeTpl },
+  { path: '/texSigns', component: TexSignsTpl },
+  { path: '/payRate', component: PayRateTpl },
+  { path: '/order', component: OrdersTpl },
+  { path: '/authority', component: AuthorityTpl },
+  { path: '/category', component: CategoryTpl },
+  { path: '/property', component: PropertyTpl },
+  { path: '/product', component: ProductTpl },
+  { path: '/refund', component: RefundTpl },
+  { path: '/goodsReturn', component: GoodsReturnTpl },
+  { path: '/supplier', component: SupplierTpl },
+  { path: '/recommend', component: RecommendTpl },
+  { path: '/promotion', component: PromotionTpl },
+  { path: '/coupon', component: CouponTpl },
+  { path: '/cash', component: CashTpl },
+  { path: '/shop', component: ShopTpl },
+  { path: '/customerCategory', component: CustomerCategoryTpl },
+  { path: '/role', component: RoleTpl },
+  { path: '/message', component: MessageTpl },
+  { path: '/salesRecord', component: SalesRecordTpl },
+  { path: '/salesRecordDetail', component: SalesRecordDetailTpl },
+  { path: '/setPrice', component: SetPriceTpl },
+  { path: '/contractManage', component: ContractManageTpl },
+  { path: '/shouzhi', component: ShouzhiTpl },
+  { path: '/visit', component: VisitTpl },
+  { path: '/personalGrowthValue', component: PersonalGrowthValueTpl },
+  { path: '/personalIntegral', component: PersonalIntegralTpl },
+  { path: '/personalCurrency', component: PersonalCurrencyTpl },
+  { path: '/integralRule', component: IntegralRuleTpl },
+  { path: '/gradeRule', component: GradeRuleTpl },
+  { path: '/productSalesVisit', component: ProductSalesVisitTpl },
+  { path: '/commodityCategoryVisit', component: CommodityCategoryVisitTpl },
+  { path: '/notice', component: NoticeTpl },
+  { path: '/salesSummary', component: SalesSummaryTpl },
+  { path: '/supplierPeriod', component: SupplierPeriodTpl },
+  { path: '/salesSummary', component: SalesSummaryTpl},
+  { path: '/supplierBill', component: SupplierBillTpl},
+  { path: '/searchword', component: SearchWordTpl},
+  { path: '/helpLink', component: HelpLinkTpl},
+  { path: '/tripDetail', component: TripDetailTpl},
+  { path: '/hotelDetail', component: HotelDetailTpl},
+  { path: '/saleCost', component: SaleCostTpl},
+  { path: '/groupActivity', component: GroupActivityTpl},
+  { path: '/point', component: PointTpl},
+  { path: '/operationLog', component: OperationLogTpl},
+  { path: '/productBrand', component: ProductBrandTpl},
+  { path: '/mvp_analyze', component: MvpAnalyze},
+  { path: '/mvp_analyze_details', component: MvpAnalyzeDetails},
+]
+const router = new VueRouter({routes: routes})
+
+new Vue({
+  router: router,
+  el: '#app',
+  render(h){
+    if(window.location.href.split('#')[1]=='/login'){
+      return h(AppLogin);
+    }
+    return h(App);
+  }
+})
